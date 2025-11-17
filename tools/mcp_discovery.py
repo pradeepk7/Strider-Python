@@ -307,21 +307,34 @@ class MCPDiscovery:
         print(f"[*] Timestamp: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}")
         print("-" * 60)
 
+        # Track announced paths to avoid duplicate "Found" messages
+        announced_paths: set = set()
+
+        def should_announce(path: Path) -> bool:
+            """Check if this path should be announced (not a duplicate)."""
+            if not path.exists():
+                return False
+            resolved = str(path.resolve())
+            if resolved in announced_paths:
+                return False
+            announced_paths.add(resolved)
+            return True
+
         # Claude Desktop Configuration
         for config_path in self.config_locations["claude_desktop"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Claude Desktop config: {config_path}")
                 self._parse_claude_desktop_config(config_path)
 
         # Claude Code Configuration
         for config_path in self.config_locations["claude_code"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Claude Code config: {config_path}")
                 self._parse_generic_json_config(config_path, "Claude Code")
 
         # VS Code Extensions
         for ext_path in self.config_locations["vscode"]:
-            if ext_path.exists():
+            if should_announce(ext_path):
                 if ext_path.is_dir():
                     print(f"[*] Scanning VS Code extensions: {ext_path}")
                     self._scan_vscode_extensions(ext_path)
@@ -331,55 +344,55 @@ class MCPDiscovery:
 
         # Cursor IDE
         for config_path in self.config_locations["cursor"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Cursor IDE config: {config_path}")
                 self._parse_cursor_config(config_path)
 
         # GitHub Copilot
         for config_path in self.config_locations["copilot"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found GitHub Copilot config: {config_path}")
                 self._parse_generic_json_config(config_path, "GitHub Copilot")
 
         # OpenAI / Codex
         for config_path in self.config_locations["openai"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found OpenAI/Codex config: {config_path}")
                 self._parse_generic_json_config(config_path, "OpenAI")
 
         # Google Gemini CLI
         for config_path in self.config_locations["gemini"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Gemini CLI config: {config_path}")
                 self._parse_generic_json_config(config_path, "Gemini")
 
         # Hugging Face
         for config_path in self.config_locations["huggingface"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Hugging Face config: {config_path}")
                 self._parse_generic_json_config(config_path, "Hugging Face")
 
         # Continue.dev
         for config_path in self.config_locations["continue"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Continue.dev config: {config_path}")
                 self._parse_continue_config(config_path)
 
         # Cody (Sourcegraph)
         for config_path in self.config_locations["cody"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Cody config: {config_path}")
                 self._parse_generic_json_config(config_path, "Cody")
 
         # Ollama
         for config_path in self.config_locations["ollama"]:
-            if config_path.exists():
+            if should_announce(config_path):
                 print(f"[+] Found Ollama config: {config_path}")
                 self._parse_generic_json_config(config_path, "Ollama")
 
         # Custom locations
         for custom_path in self.config_locations["custom"]:
-            if custom_path.exists():
+            if should_announce(custom_path):
                 print(f"[+] Found custom MCP config: {custom_path}")
                 if custom_path.is_file():
                     self._parse_generic_mcp_config(custom_path)
