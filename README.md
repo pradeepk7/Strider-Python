@@ -244,6 +244,95 @@ python tools/mcp_discovery.py
 # or sent to the Strider Data Plane for centralized monitoring
 ```
 
+## Enterprise Deployment
+
+The Python discovery tool is ideal for immediate enterprise deployment with zero external dependencies. Deploy via existing system management infrastructure and gain instant visibility into Shadow AI across your endpoint fleet.
+
+### Deployment Strategy
+
+1. **Package the Script** - Bundle `mcp_discovery.py` (single file, no dependencies)
+2. **Deploy via System Management** - Distribute using JAMF, SCCM, Intune, Ansible, or Chef
+3. **Schedule Daily Execution** - Configure cron, launchd, or Task Scheduler
+4. **Collect Output Files** - Retrieve CSV/JSON through your management tool
+5. **Centralize in CMDB** - Import inventory data into your asset management system
+
+### Example: Scheduled Deployment
+
+**macOS (launchd):**
+```bash
+# Daily scan at 2 AM
+/usr/bin/python3 /usr/local/bin/mcp_discovery.py
+# Output: /usr/local/bin/output/mcp_inventory.csv
+```
+
+**Windows (Task Scheduler):**
+```powershell
+# PowerShell scheduled task
+python.exe C:\Tools\mcp_discovery.py
+# Output: C:\Tools\output\mcp_inventory.csv
+```
+
+**Linux (cron):**
+```bash
+# Add to crontab - run daily at 3 AM
+0 3 * * * /usr/bin/python3 /opt/strider/mcp_discovery.py
+```
+
+### CMDB & SIEM Integration
+
+The structured CSV/JSON output integrates directly with:
+
+- **ServiceNow CMDB** - Import as Configuration Items with risk metadata
+- **Jira Assets** - Track MCP servers as discoverable software assets
+- **Splunk** - Index JSON for real-time security monitoring and alerting
+- **Elastic SIEM** - Ingest for threat detection and compliance dashboards
+- **Microsoft Sentinel** - Feed into cloud-native SIEM
+- **Custom Data Lakes** - Standard formats for any analytics pipeline
+
+### Example: ServiceNow Import
+
+```python
+# ServiceNow REST API integration
+import requests
+import json
+
+with open('output/mcp_inventory.json') as f:
+    data = json.load(f)
+
+for server in data['servers']:
+    ci_record = {
+        'name': server['server_name'],
+        'u_risk_score': server['risk_score'],
+        'u_risk_factors': server['risk_factors'],
+        'u_hostname': server['hostname'],
+        'u_discovery_time': server['timestamp']
+    }
+    # POST to ServiceNow CI table
+```
+
+### Benefits for Security Teams
+
+- **Zero Infrastructure Required** - Single Python file, no servers or databases
+- **No External Dependencies** - Uses only Python standard library
+- **Immediate ROI** - Deploy in minutes, get results immediately
+- **Minimal Attack Surface** - No network connectivity, no cloud services
+- **Compliance Ready** - Full audit trail with timestamps and risk scores
+- **Cost Effective** - Leverage existing Python installations and management tools
+- **Vendor Agnostic** - Standard output formats work with any CMDB/SIEM
+
+### Deployment Checklist
+
+- [ ] Verify Python 3.7+ installed on target endpoints
+- [ ] Test script execution with appropriate permissions
+- [ ] Configure output directory with write access
+- [ ] Set up scheduled task (daily recommended)
+- [ ] Configure file collection in system management tool
+- [ ] Set up CMDB/SIEM ingestion pipeline
+- [ ] Create alerting rules for HIGH RISK servers
+- [ ] Document baseline of approved MCP servers
+
+This approach provides immediate visibility into Shadow AI without requiring additional infrastructure, vendor contracts, or cloud dependencies. Start detecting unauthorized AI tools today using your existing enterprise management investment.
+
 ## Extending the Tool
 
 ### Adding New LLM Client Support
